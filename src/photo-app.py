@@ -1,4 +1,5 @@
 # Import all the needed classes and modules
+import os
 import sys
 from PySide6.QtWidgets import QLineEdit, QLabel, QPushButton, QApplication, QVBoxLayout, QDialog, QHBoxLayout, QSpinBox,QMessageBox, QFileDialog, QGridLayout
 from PySide6.QtCore import QIODevice, QFile, QTextStream, Qt
@@ -12,7 +13,9 @@ class Main(QDialog):
         self.layout = QVBoxLayout()
         self.layout2 = QGridLayout() # Grid layout is to display the photos
         self.numRemove = QSpinBox(self)  # This number is for the user to choose which picture they will remove
-        self.read= QFile("QTPhotoFile.txt") # File that stores all the photo directories
+        self.photoListFileName = "QTPhotoFile.txt"
+        self.tempPhotoListFileName = "QTPhotoFile.txt.tmp"
+        self.read= QFile(self.photoListFileName) # File that stores all the photo directories
         self.maxRange = self.fileCount() # Variable that stores the number of pictures in the file
         self.numRemove.setRange(1, self.maxRange)
 
@@ -37,10 +40,8 @@ class Main(QDialog):
         self.layout.addLayout(self.layout2)
 
         #Call on the function to display the pictures
-        self.display()
+        self.display()      
 
-        
-    
     def display(self):
         '''
         This function is used to display all the pictures stored in the text file.
@@ -62,14 +63,12 @@ class Main(QDialog):
                 pictures.setPixmap(pixmap1) 
                 self.column = self.count % 5 # This is because each row has 5 pictures
                 # The program alternates the rows between the number and the picture 
-                self.row = 2 * int((self.count /5))+1 
+                self.row = 2 * int((self.count / 5)) + 1  
                 self.layout2.addWidget(pictures, *(self.row+1, self.column)) # Adds the picture to the layout
                 self.layout2.addWidget(number, *(self.row, self.column)) # Adds the number count to the grid layout
                 self.count +=1
 
             self.read.close()
-
-
 
     def fileCount(self):
         '''
@@ -84,8 +83,6 @@ class Main(QDialog):
             self.read.close()
         return count
 
-
-
     def upload(self):
         '''
         This function allows user to upload a picture
@@ -97,7 +94,7 @@ class Main(QDialog):
             )
 
         if name1[0] !="": # To prevent errors, in the case that the user clicked cancel instead of selecting an image
-            write = QFile("QTPhotoFile.txt")
+            write = QFile(self.photoListFileName)
             if not(write.open(QIODevice.Append)):
                 return
             # Add the new picture directory
@@ -123,39 +120,27 @@ class Main(QDialog):
     def remove(self):
         '''
         This function removes a line from the file
-        '''
+        '''        
+        self.tempFile= QFile(self.tempPhotoListFileName) # File that stores all the photo directories
+
         count = 0 # Keeps track of the line
-        s= "" # All of the file's content is stored in this string
 
-        # Picks the line that user wants to remove by adding "DELETETHISLINE"
+        # Picks the line that user wants to remove
         if (self.read.open(QIODevice.ReadWrite)):
-            i = QTextStream(self.read)
-            while not(i.atEnd() ):
-                count+=1
-                line = i.readLine()
-                if count == int(self.numRemove.text()): # If it's the selected line, add "DELETETHISLINE"
-                    s+= (line + "DELETETHISLINE"+ "\n")
-                else:
-                    s+= (line + "\n")
+            if(self.tempFile.open(QIODevice.ReadWrite)):
 
-            self.read.resize(0) # Removes all the content from the file
-            QTextStream(self.read) << s  #Adds back everything from the file including the deleted line
+                i = QTextStream(self.read)
+                while not(i.atEnd() ):
+                    count+=1
+                    line = i.readLine()
+                    if count != int(self.numRemove.text()): # If it's not the selected line add it to the temp
+                        QTextStream(self.tempFile) << line
+
+            self.tempFile.close()
             self.read.close()
 
-        a = "" # All of the file's content excluding the deleted line will be stored in this string
+        os.replace(self.tempPhotoListFileName, self.photoListFileName)
 
-        # Now to actually remove the line from the file:
-        if (self.read.open(QIODevice.ReadWrite)):
-            i = QTextStream(self.read)
-            while not(i.atEnd() ):
-                line = i.readLine()
-                if("DELETETHISLINE" not in line):
-                    a += (line+ "\n") # Add all the lines back, not including the deleted line
-
-
-            self.read.resize(0) # Removes all the content from the file
-            QTextStream(self.read) << a # Adds back everything to the file, not including the deleted line
-            self.read.close()
         # To make sure the number doesn't go negative (e.g. user clicks remove when there's nothing there)
         if self.maxRange > 0:
             # Change range of spinbox, as there has been one removed
