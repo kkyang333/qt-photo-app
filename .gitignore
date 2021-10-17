@@ -130,3 +130,6 @@ dmypy.json
 
 # MacOS files
 .DS_Store
+
+# Application-specific files
+QTPhotoFile.txt
