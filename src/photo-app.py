@@ -1,7 +1,7 @@
 # Import all the needed classes and modules
 import os
 import sys
-from PySide6.QtWidgets import QLineEdit, QLabel, QPushButton, QApplication, QVBoxLayout, QDialog, QHBoxLayout, QSpinBox,QMessageBox, QFileDialog, QGridLayout
+from PySide6.QtWidgets import QLineEdit, QLabel, QPushButton, QApplication, QVBoxLayout, QDialog, QHBoxLayout, QSpinBox, QMessageBox, QFileDialog, QGridLayout
 from PySide6.QtCore import QIODevice, QFile, QTextStream, Qt
 from PySide6.QtGui import QPixmap, QImage
 
@@ -15,7 +15,7 @@ class Main(QDialog):
         self.numRemove = QSpinBox(self)  # This number is for the user to choose which picture they will remove
         self.photoListFileName = "QTPhotoFile.txt"
         self.tempPhotoListFileName = "QTPhotoFile.txt.tmp"
-        self.read= QFile(self.photoListFileName) # File that stores all the photo directories
+        self.read = QFile(self.photoListFileName) # File that stores all the photo directories
         self.maxRange = self.fileCount() # Variable that stores the number of pictures in the file
         self.numRemove.setRange(1, self.maxRange)
 
@@ -47,7 +47,7 @@ class Main(QDialog):
         This function is used to display all the pictures stored in the text file.
         '''
         self.count = 0 # Keeps count for the pictures
-        self.row = self.count /5 # Each row has 5 pictures
+        self.row = self.count / 5 # Each row has 5 pictures
         self.column = 0
         
         if (self.read.open(QIODevice.ReadOnly)):
@@ -57,7 +57,7 @@ class Main(QDialog):
                 line = i.readLine()
                 pictures = QLabel() # Used to display the photo
                 number = QLabel() # Used to display the number of the photo
-                number.setText(str(self.count+1)) # The +1 is because the count starts at 0
+                number.setText(str(self.count + 1)) # The +1 is because the count starts at 0
                 pixmap1 = QPixmap(str(line)) # Set the QPixmap to the current picture directory
                 pixmap1 = pixmap1.scaled(100, 100, Qt.KeepAspectRatio) # Scales photo without ruining the aspect ratio
                 pictures.setPixmap(pixmap1) 
@@ -66,7 +66,7 @@ class Main(QDialog):
                 self.row = 2 * int((self.count / 5)) + 1  
                 self.layout2.addWidget(pictures, *(self.row+1, self.column)) # Adds the picture to the layout
                 self.layout2.addWidget(number, *(self.row, self.column)) # Adds the number count to the grid layout
-                self.count +=1
+                self.count += 1
 
             self.read.close()
 
@@ -79,7 +79,7 @@ class Main(QDialog):
             i = QTextStream(self.read)
             while not(i.atEnd()):
                 line = i.readLine()
-                count +=1
+                count += 1
             self.read.close()
         return count
 
@@ -105,17 +105,17 @@ class Main(QDialog):
             pixmap = QPixmap(name1[0]) # name1 is a tuple and the second element is  "All Files (*)"
             pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio) # Scales photo without ruining the aspect ratio
             number = QLabel()
-            number.setText(str(self.count+1)) # The +1 is because the count starts at 0
+            number.setText(str(self.count + 1)) # The +1 is because the count starts at 0
             label.setPixmap(pixmap)
             self.column = self.count % 5 # This is because each row has 5 pictures
             # The program alternates the rows between the number and the picture 
-            self.row = 2 * int((self.count /5))+1 
-            self.layout2.addWidget(label, *(self.row+1, self.column)) # Adds the picture to the layout
+            self.row = 2 * int((self.count / 5)) + 1 
+            self.layout2.addWidget(label, *(self.row + 1, self.column)) # Adds the picture to the layout
             self.layout2.addWidget(number, *(self.row, self.column)) # Adds the number count to the grid layout
             # Since the user uploaded a photo, add to the range of the number of photos there are
-            self.maxRange +=1
+            self.maxRange += 1
             self.numRemove.setRange(1, self.maxRange)
-            self.count +=1
+            self.count += 1
 
     def remove(self):
         '''
@@ -130,8 +130,8 @@ class Main(QDialog):
             if(self.tempFile.open(QIODevice.ReadWrite)):
 
                 i = QTextStream(self.read)
-                while not(i.atEnd() ):
-                    count+=1
+                while not(i.atEnd()):
+                    count += 1
                     line = i.readLine()
                     if count != int(self.numRemove.text()): # If it's not the selected line add it to the temp
                         QTextStream(self.tempFile) << line
@@ -144,7 +144,7 @@ class Main(QDialog):
         # To make sure the number doesn't go negative (e.g. user clicks remove when there's nothing there)
         if self.maxRange > 0:
             # Change range of spinbox, as there has been one removed
-            self.maxRange -=1
+            self.maxRange -= 1
             self.numRemove.setRange(1, self.maxRange)
         # Remove all the pictures to display them again
         for i in reversed(range(self.layout2.count())):
