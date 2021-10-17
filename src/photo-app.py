@@ -134,7 +134,7 @@ class Main(QDialog):
                     count += 1
                     line = i.readLine()
                     if count != int(self.numRemove.text()): # If it's not the selected line add it to the temp
-                        QTextStream(self.tempFile) << line
+                        QTextStream(self.tempFile) << line << "\n"
 
             self.tempFile.close()
             self.read.close()
